@@ -1,11 +1,13 @@
 package com.example.news_api.presentation.news_list
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.news_api.BuildConfig
@@ -24,82 +27,101 @@ import com.example.news_api.R
 import com.example.news_api.data.remote.RetrofitInstance
 import com.example.news_api.data.remote.model.NewsDto
 
-/**
- * Função composable que apresenta a lista de notícias no ecrã principal da aplicação.
- *
- * Esta função carrega as notícias de uma API remota, mostra mensagens de erro ou estado de carregamento,
- * e apresenta cada notícia numa lista clicável. O utilizador pode navegar para os detalhes de cada notícia.
- *
- * @param navController Controlador de navegação para permitir transições entre ecrãs.
- */
 @Composable
 fun NewsListScreen(navController: NavHostController) {
-    // Lista de notícias obtida da API
+    val categories = listOf("sports", "world", "technology", "movies")
+    var selectedCategory by remember { mutableStateOf("sports") }
     var newsList by remember { mutableStateOf<List<NewsDto>>(emptyList()) }
-    // Mensagem de erro em caso de falha
     var errorMessage by remember { mutableStateOf("") }
 
-    // Carrega as notícias ao iniciar o composable
-    LaunchedEffect(Unit) {
+    LaunchedEffect(selectedCategory) {
         try {
-            // Obtém as notícias da API
-            val response = RetrofitInstance.api.getTopStories("sports", BuildConfig.NYT_API_KEY)
+            errorMessage = ""
+            val response = RetrofitInstance.api.getTopStories(selectedCategory, BuildConfig.NYT_API_KEY)
             newsList = response.results
         } catch (e: Exception) {
             errorMessage = "Erro ao carregar notícias: ${e.message}"
         }
     }
 
-    // Layout principal da tela
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Mostra uma mensagem de erro, caso exista
-        if (errorMessage.isNotEmpty()) {
-            Text(
-                text = errorMessage,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-        // Mostra uma mensagem enquanto as notícias estão a ser carregadas
-        else if (newsList.isEmpty()) {
-            Text(
-                text = "A carregar notícias...",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-        // Mostra a lista de notícias
-        else {
-            LazyColumn(
+        Column {
+            // Logo do New York Times
+            Image(
+                painter = painterResource(id = R.drawable.nyt_logo),
+                contentDescription = "Logo do New York Times",
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                // Cabeçalho com o logótipo do New York Times
-                item {
-                    Image(
-                        painter = painterResource(id = R.drawable.nyt_logo), // Logótipo do NYT
-                        contentDescription = "Logo do New York Times",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp)
-                            .size(width = 175.dp, height = 75.dp),
-                        alignment = Alignment.Center
-                    )
-                }
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+                    .size(width = 140.dp, height = 40.dp),
+                alignment = Alignment.Center
+            )
 
-                // Itens da lista de notícias
-                items(newsList) { news ->
-                    NewsItem(news = news) {
-                        // Navega para o ecrã de detalhes ao clicar numa notícia
-                        navController.navigate(
-                            "newsDetail/${news.title}/${news.abstract}"
+            // Categorias horizontais
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                categories.forEach { category ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .clickable { selectedCategory = category }
+                    ) {
+                        Text(
+                            text = category.uppercase(),
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                color = Color.Black,
+                                fontSize = 14.sp
+                            )
                         )
+                        if (selectedCategory == category) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .height(2.dp)
+                                    .background(Color.Black)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Mensagens de erro ou lista de notícias
+            if (errorMessage.isNotEmpty()) {
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else if (newsList.isEmpty()) {
+                Text(
+                    text = "A carregar notícias...",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                LazyColumn(
+                    state = rememberLazyListState(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    items(newsList) { news ->
+                        NewsItem(news = news) {
+                            navController.navigate(
+                                "newsDetail/${Uri.encode(news.title)}/${Uri.encode(news.abstract)}/${Uri.encode(news.multimedia?.get(0)?.url ?: "")}/${Uri.encode(news.url)}"
+                            )
+                        }
                     }
                 }
             }
@@ -107,59 +129,43 @@ fun NewsListScreen(navController: NavHostController) {
     }
 }
 
-/**
- * Função composable que representa um único item de notícia na lista.
- *
- * Cada item inclui uma imagem (se disponível), o título da notícia e uma descrição curta.
- * Os itens são clicáveis, permitindo navegar para mais detalhes.
- *
- * @param news Objeto NewsDto que contém as informações da notícia.
- * @param onClick Ação a executar quando o item for clicado.
- */
 @Composable
 fun NewsItem(news: NewsDto, onClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .fillMaxWidth() // Preenche toda a largura disponível
-            .padding(vertical = 8.dp) // Espaçamento entre os cartões
-            .clickable { onClick() }, // Torna o cartão clicável
-        colors = androidx.compose.material3.CardDefaults.cardColors(
-            containerColor = Color.White // Fundo branco do cartão
-        ),
-        elevation = androidx.compose.material3.CardDefaults.cardElevation(
-            defaultElevation = 4.dp // Sombra para criar o efeito de flutuação
-        )
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable { onClick() },
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color.White),
+        elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        // Layout em linha que mostra a imagem e os textos
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp), // Margem interna do cartão
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Mostra a imagem da notícia, se disponível
             if (!news.multimedia.isNullOrEmpty()) {
                 Image(
-                    painter = rememberAsyncImagePainter(news.multimedia[0].url), // Carrega a imagem da URL
+                    painter = rememberAsyncImagePainter(news.multimedia[0].url),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(80.dp) // Tamanho da imagem
-                        .clip(MaterialTheme.shapes.small), // Bordas arredondadas
-                    contentScale = ContentScale.Crop // Ajusta a imagem para o tamanho especificado
+                        .size(80.dp)
+                        .clip(MaterialTheme.shapes.small),
+                    contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.width(16.dp)) // Espaçamento entre a imagem e o texto
+                Spacer(modifier = Modifier.width(16.dp))
             }
-            // Coluna que mostra o título e o resumo da notícia
             Column {
                 Text(
                     text = news.title,
-                    style = MaterialTheme.typography.titleMedium, // Estilo do título
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = news.abstract,
-                    style = MaterialTheme.typography.bodySmall, // Estilo do resumo
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f) // Texto com opacidade reduzida
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
             }
         }

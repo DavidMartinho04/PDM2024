@@ -1,45 +1,94 @@
 package com.example.news_api.presentation.news_detail
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.jsoup.Jsoup
 
-/**
- * Função composable que apresenta o ecrã de detalhes de uma notícia.
- *
- * Este ecrã mostra o título e o resumo (abstract) de uma notícia.
- *
- * @param title O título da notícia.
- * @param abstract O resumo (abstract) da notícia.
- */
 @Composable
-fun NewsDetailScreen(title: String, abstract: String) {
-    // Coluna que organiza os elementos do ecrã verticalmente
+fun NewsDetailScreen(title: String, abstract: String, imageUrl: String?, articleUrl: String) {
+    var articleContent by remember { mutableStateOf("A carregar conteúdo...") }
+
+    // Realiza a chamada para obter o texto HTML
+    LaunchedEffect(articleUrl) {
+        articleContent = fetchArticleBody(articleUrl)
+    }
+
     Column(
         modifier = Modifier
-            .fillMaxSize() // Preenche todo o espaço disponível
-            .padding(16.dp) // Adiciona margens de 16dp em todos os lados
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        // Apresenta o título da notícia com estilo destacado
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineMedium, // Estilo de título médio
-            color = MaterialTheme.colorScheme.primary // Cor principal do tema
+            style = MaterialTheme.typography.headlineMedium,
+            color = Color.Black,
         )
-        // Espaçamento vertical de 16dp entre o título e o resumo
         Spacer(modifier = Modifier.height(16.dp))
-        // Apresenta o resumo da notícia com estilo de corpo
+
         Text(
             text = abstract,
-            style = MaterialTheme.typography.bodyLarge, // Estilo de texto de corpo grande
-            color = MaterialTheme.colorScheme.onSurface // Cor para textos em superfícies
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (!imageUrl.isNullOrEmpty()) {
+            Image(
+                painter = rememberAsyncImagePainter(imageUrl),
+                contentDescription = "Imagem da notícia",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        Text(
+            text = articleContent,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Justify
         )
     }
 }
+
+suspend fun fetchArticleBody(url: String): String {
+    return withContext(Dispatchers.IO) {
+        try {
+            // Faz a requisição para obter o HTML da página
+            val document = Jsoup.connect(url).get()
+
+            // Seleciona o script que tem o JSON-LD
+            val jsonScript = document.select("script[type=application/ld+json]").first()?.data()
+
+            if (jsonScript != null) {
+                // Converte o conteúdo JSON para um objeto
+                val jsonObject = org.json.JSONObject(jsonScript)
+
+                // Extrai o campo "articleBody"
+                if (jsonObject.has("articleBody")) {
+                    return@withContext jsonObject.getString("articleBody")
+                }
+            }
+            "Conteúdo não encontrado."
+        } catch (e: Exception) {
+            "Erro ao carregar o conteúdo: ${e.message}"
+        }
+    }
+}
+
