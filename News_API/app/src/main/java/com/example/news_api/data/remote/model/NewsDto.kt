@@ -3,12 +3,12 @@ package com.example.news_api.data.remote.model
 import com.google.gson.annotations.SerializedName
 
 /**
- * Classe que representa os dados de uma notícia retornados pela API.
+ * Classe que mostra os dados das notícias retornados pela API.
  *
  * @property title O título da notícia.
  * @property abstract Um resumo ou descrição breve da notícia.
  * @property url O URL que direciona para a página completa da notícia.
- * @property multimedia Uma lista de objetos [Multimedia], que representa as imagens associadas à notícia.
+ * @property multimedia Uma lista de objetos [Multimedia], que mostra as imagens associadas à notícia.
  */
 data class NewsDto(
     @SerializedName("title") val title: String, // Associa o campo "title" da API ao campo "title" da classe.

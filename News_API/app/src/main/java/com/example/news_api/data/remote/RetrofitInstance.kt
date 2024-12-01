@@ -7,12 +7,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 /**
  * Objeto responsável por criar e fornecer uma instância única de Retrofit definida para a API.
  *
- * Este objeto implementa o padrão Singleton para garantir que apenas uma instância de Retrofit seja criada e reutilizada em toda a aplicação.
  */
 object RetrofitInstance {
 
     /**
-     * A URL base utilizada para todas as requisições à API do New York Times.
+     * A URL base utilizada para todas as requisições à API.
      */
     private const val BASE_URL = "https://api.nytimes.com/svc/"
 
@@ -22,7 +21,7 @@ object RetrofitInstance {
      * Utiliza o Retrofit para construir uma implementação da interface [NewsApi], que define os endpoints da API.
      *
      * - `baseUrl`: Define a URL base da API.
-     * - `addConverterFactory`: Configura o Retrofit para converter automaticamente as respostas JSON em objetos Kotlin, utilizando o Gson.
+     * - `addConverterFactory`: Configura o Retrofit para converter automaticamente as respostas JSON em objetos Kotlin, com o Gson.
      * - `build`: Constrói a instância do Retrofit com as configurações fornecidas.
      * - `create`: Gera a implementação da interface [NewsApi].
      */
