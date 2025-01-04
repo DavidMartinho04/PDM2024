@@ -13,22 +13,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 
+/**
+ * Componente para exibir o valor atual no visor da calculadora.
+ *
+ * @param value O valor a ser mostrado no visor.
+ */
 @Composable
-fun CalculatorDisplay() {
+fun CalculatorDisplay(value: String) {
     Box(
         modifier = Modifier
-            .width(350.dp)
-            .height(100.dp)
-            .background(Color(193, 230, 193, 170), shape = RoundedCornerShape(16.dp))
-            .padding(16.dp)
+            .width(350.dp) // Define a largura do visor
+            .height(100.dp) // Define a altura do visor
+            .background(
+                Color(193, 230, 193, 170), // Cor de fundo do visor com opacidade
+                shape = RoundedCornerShape(16.dp) // Bordas arredondadas
+            )
+            .padding(16.dp) // Espaçamento interno do visor
     ) {
+        // Texto exibido no visor
         Text(
-            text = "123456",
-            fontSize = 64.sp,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Monospace,
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.CenterEnd)
+            text = value, // Texto dinâmico com o valor atual
+            fontSize = 64.sp, // Tamanho da fonte
+            fontWeight = FontWeight.Bold, // Negrito para maior destaque
+            fontFamily = FontFamily.Monospace, // Fonte monoespaçada (para uniformidade)
+            color = Color.Black, // Cor do texto
+            modifier = Modifier.align(Alignment.CenterEnd) // Alinha o texto à direita
         )
     }
 }

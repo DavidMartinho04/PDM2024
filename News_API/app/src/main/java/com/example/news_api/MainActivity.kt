@@ -20,6 +20,7 @@ class MainActivity : ComponentActivity() {
         // Configura o conteúdo da atividade
         setContent {
             // Chama o composable principal da aplicação
+            NewsApp()
         }
     }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "576512064756",
+    "project_id": "loja-pdm-3a864",
+    "storage_bucket": "loja-pdm-3a864.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:576512064756:android:190428c0fcf3da375a32a1",
+        "android_client_info": {
+          "package_name": "com.example.loja_pdm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSkQ0AlI53m1-c_Bk-sZxlZYbhPIdDmck"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
