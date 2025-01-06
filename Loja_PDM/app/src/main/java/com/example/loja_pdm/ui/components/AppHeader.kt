@@ -3,9 +3,8 @@ package com.example.loja_pdm.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -19,6 +18,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Text
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -31,7 +31,9 @@ fun AppHeader(
         // Navega para a tela de favoritos
         navController.navigate("favorites")
     },
-    onCartClick: () -> Unit = {},
+    onCartClick: () -> Unit = {
+        navController.navigate("cart")
+    },
     onMenuClick: () -> Unit = {}
 ) {
     val primaryColor = Color(0xFFFF6F00)  // Laranja
@@ -54,12 +56,20 @@ fun AppHeader(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Logo da loja
+                // Logo da loja que agora navega para o menu principal
                 Image(
                     painter = painterResource(id = R.drawable.urban_shoes),
                     contentDescription = "Logo da loja",
                     modifier = Modifier
                         .size(130.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            navController.navigate("menu") {
+                                popUpTo("menu") { inclusive = true }
+                            }
+                        }
                 )
 
                 // Ícones do cabeçalho
@@ -93,10 +103,10 @@ fun AppHeader(
             }
         }
 
-        // Categorias
+        // Categorias com navegação ajustada
         Row(
             modifier = Modifier
-                .offset(y = (-40).dp) // Move as categorias para cima
+                .offset(y = (-40).dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
@@ -104,24 +114,25 @@ fun AppHeader(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.clickable {
-                        navController.navigate("category/$category") // Navega para a página da categoria
+                        when (category) {
+                            "Homem" -> navController.navigate("man")
+                            "Mulher" -> navController.navigate("woman")
+                            "Criança" -> navController.navigate("kids")
+                        }
                     }
                 ) {
-                    // Texto da categoria
                     Text(
                         text = category,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
                         color = primaryColor
                     )
-
-                    // Risco laranja abaixo do texto
-                    Spacer(modifier = Modifier.height(4.dp)) // Espaço entre o texto e o risco
+                    Spacer(modifier = Modifier.height(4.dp))
                     Box(
                         modifier = Modifier
-                            .width(50.dp) // Largura do risco
-                            .height(2.dp) // Altura do risco
-                            .background(primaryColor) // Cor laranja
+                            .width(50.dp)
+                            .height(2.dp)
+                            .background(primaryColor)
                     )
                 }
             }

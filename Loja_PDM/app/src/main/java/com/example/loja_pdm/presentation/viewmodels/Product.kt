@@ -1,4 +1,4 @@
-package com.example.loja_pdm.data.models
+package com.example.loja_pdm.presentation.viewmodels
 
 // Product.kt
 data class Product(
@@ -8,5 +8,6 @@ data class Product(
     val cor: String = "",
     val marca: String = "",
     val modelo: String = "",
-    val preco: Double = 0.0
+    val preco: Double = 0.0,
+    val tipo: String = ""
 )

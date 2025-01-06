@@ -12,27 +12,42 @@ import androidx.navigation.navArgument
 import com.example.loja_pdm.presentation.createaccount.CreateAccountScreen
 import com.example.loja_pdm.presentation.createaccount.FinalizeAccountScreen
 import com.example.loja_pdm.presentation.product.DetailProductScreen
-import com.example.loja_pdm.presentation.product.FavoritesScreen
+import com.example.loja_pdm.presentation.favorites.FavoritesScreen
 import com.example.loja_pdm.presentation.login.LoginScreen
 import com.example.loja_pdm.presentation.menu.ShoeMenu
+import com.example.loja_pdm.presentation.cart.CartScreen
+import com.example.loja_pdm.presentation.categories.KidsScreen
+import com.example.loja_pdm.presentation.categories.ManScreen
+import com.example.loja_pdm.presentation.categories.WomanScreen
+import com.example.loja_pdm.presentation.checkout.FinalizePurchaseScreen
+import com.example.loja_pdm.presentation.purchase.PurchaseHistoryScreen
+import com.example.loja_pdm.presentation.viewmodels.CartViewModel
 import com.example.loja_pdm.presentation.viewmodels.UserViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel) {
+fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel, cartViewModel: CartViewModel) {
+    val auth = FirebaseAuth.getInstance()
+
+    // Verificar o estado de login e garantir a persistência
+    val isLoggedIn = auth.currentUser != null
+    if (isLoggedIn) {
+        userViewModel.setEmail(auth.currentUser?.email ?: "")
+    }
+
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "login", // Inicia no login
+            startDestination = if (isLoggedIn) "menu" else "login", // Garantia de autenticação
             modifier = Modifier.padding(innerPadding)
         ) {
             // Ecrã de Login
             composable("login") {
                 LoginScreen(
                     onLoginSuccess = { email ->
-                        // Atualiza o email no UserViewModel após login
                         userViewModel.setEmail(email)
                         navController.navigate("menu") {
-                            popUpTo("login") { inclusive = true } // Remove login da pilha de navegação
+                            popUpTo("login") { inclusive = true }
                         }
                     },
                     onCreateAccountClick = {
@@ -61,25 +76,24 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 )
             }
 
-            // Ecrã do Menu
+            // Ecrã do Menu Principal
             composable("menu") {
-                // Passa o UserViewModel para garantir o acesso ao email
                 ShoeMenu(navController = navController, userViewModel = userViewModel)
             }
 
             // Ecrã de Categoria Homem
-            composable("men") {
-                // MenScreen() // Implementação futura
+            composable("man") {
+                ManScreen(navController = navController)
             }
 
             // Ecrã de Categoria Mulher
-            composable("women") {
-                // WomenScreen() // Implementação futura
+            composable("woman") {
+                WomanScreen(navController = navController)
             }
 
             // Ecrã de Categoria Criança
             composable("kids") {
-                // KidsScreen() // Implementação futura
+                KidsScreen(navController = navController)
             }
 
             // Ecrã de Detalhes do Produto
@@ -91,7 +105,7 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
                 DetailProductScreen(
                     navController = navController,
                     productId = productId,
-                    userViewModel = userViewModel // Passa o UserViewModel
+                    userViewModel = userViewModel
                 )
             }
 
@@ -99,7 +113,33 @@ fun AppNavigation(navController: NavHostController, userViewModel: UserViewModel
             composable("favorites") {
                 FavoritesScreen(
                     userEmail = userViewModel.email,
-                    navController = navController // Passa o NavController
+                    navController = navController
+                )
+            }
+
+            // Tela do Carrinho de Compras
+            composable("cart") {
+                CartScreen(
+                    userEmail = userViewModel.email,
+                    navController = navController,
+                    cartViewModel = cartViewModel
+                )
+            }
+
+            // Tela de Finalizar Compra
+            composable("checkoutForm") {
+                FinalizePurchaseScreen(
+                    userEmail = userViewModel.email,
+                    navController = navController,
+                    cartViewModel = cartViewModel
+                )
+            }
+
+            // Tela de Histórico de Compras
+            composable("purchaseHistory") {
+                PurchaseHistoryScreen(
+                    navController = navController,
+                    userEmail = userViewModel.email
                 )
             }
         }

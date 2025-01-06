@@ -1,4 +1,4 @@
-package com.example.loja_pdm.presentation.product
+package com.example.loja_pdm.presentation.favorites
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,7 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.loja_pdm.data.models.Product
+import com.example.loja_pdm.presentation.viewmodels.Product
 
 // Componente para mostrar um item de produto favorito
 @Composable

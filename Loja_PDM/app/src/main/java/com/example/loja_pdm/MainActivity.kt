@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.navigation.compose.rememberNavController
 import com.example.loja_pdm.presentation.navigation.AppNavigation
+import com.example.loja_pdm.presentation.viewmodels.CartViewModel
 import com.example.loja_pdm.presentation.viewmodels.UserViewModel
 
 class MainActivity : ComponentActivity() {
@@ -14,8 +15,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val userViewModel: UserViewModel by viewModels()
+            val cartViewModel: CartViewModel by viewModels()
 
-            AppNavigation(navController, userViewModel)
+            AppNavigation(navController, userViewModel, cartViewModel)
         }
     }
 }

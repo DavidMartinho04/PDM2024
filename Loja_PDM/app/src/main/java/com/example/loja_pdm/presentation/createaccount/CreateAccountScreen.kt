@@ -51,11 +51,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
+import com.example.loja_pdm.data.firebase.uploadPhotoToFirebaseStorage
 import com.example.loja_pdm.presentation.viewmodels.UserViewModel
 import com.example.loja_pdm.ui.components.ProgressIndicators
-import com.google.firebase.storage.FirebaseStorage
 import java.util.Calendar
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -366,25 +365,4 @@ fun CreateAccountScreen(
     }
 }
 
-// Função para fazer upload da foto para o Firebase Storage
-fun uploadPhotoToFirebaseStorage(
-    photoUri: Uri, // URI da foto a ser carregada
-    onSuccess: (String) -> Unit, // Callback de sucesso com o URL da foto
-    onFailure: (Exception) -> Unit // Callback de falha com a exceção
-) {
-    val storageRef = FirebaseStorage.getInstance().reference
-    val fileName = "${UUID.randomUUID()}.jpg" // Nome único para o arquivo
-    val photoRef = storageRef.child("user_photos/$fileName")
 
-    // Faz upload do arquivo para o Firebase Storage
-    photoRef.putFile(photoUri)
-        .addOnSuccessListener {
-            // Obtém o URL de download após o upload
-            photoRef.downloadUrl.addOnSuccessListener { uri ->
-                onSuccess(uri.toString())
-            }
-        }
-        .addOnFailureListener { exception ->
-            onFailure(exception)
-        }
-}

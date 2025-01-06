@@ -34,7 +34,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.loja_pdm.data.firebase.registerUser
 import com.example.loja_pdm.presentation.viewmodels.UserViewModel
@@ -57,7 +56,6 @@ fun FinalizeAccountScreen(
     var address by remember { mutableStateOf("") }
     var postalCode by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("Masculino") } // Género inicial padrão
-    var expanded by remember { mutableStateOf(false) } // Controla se o menu dropdown está expandido
 
     // Contexto para exibir Toasts
     val context = LocalContext.current
